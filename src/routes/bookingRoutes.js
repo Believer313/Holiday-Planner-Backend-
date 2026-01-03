@@ -3,18 +3,20 @@ const router = express.Router();
 
 const {
   createBooking,
+  createPublicBooking,
   getUserBookings,
   getAllBookings
 } = require('../controllers/bookingController');
 
-const auth = require('../middlewares/auth');
+const { protect } = require('../middlewares/auth');   // <-- FIX
 const permit = require('../middlewares/permit');
 
-// User routes
-router.post('/', auth, createBooking);
-router.get('/user/:userId', auth, getUserBookings);
+// PUBLIC ROUTE
+router.post('/public', createPublicBooking);
 
-// Admin routes
-router.get('/', auth, permit('admin'), getAllBookings);
+// AUTHENTICATED ROUTES
+router.post('/', protect, createBooking);
+router.get('/user/:userId', protect, getUserBookings);
+router.get('/', protect, permit('admin'), getAllBookings);
 
 module.exports = router;

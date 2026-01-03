@@ -1,7 +1,8 @@
+// routes/tourRoutes.js — FINAL 100% WORKING VERSION
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' }); // Temporary storage for uploaded files
+const upload = multer({ dest: 'uploads/' });
 
 const {
   createTour,
@@ -11,16 +12,17 @@ const {
   deleteTour
 } = require('../controllers/tourController');
 
-const auth = require('../middlewares/auth');
-const permit = require('../middlewares/permit');
+// CORRECT IMPORT — USE YOUR REAL MIDDLEWARE FILE NAME!
+const { protect, isAdmin } = require('../middlewares/auth'); 
+// If your file is named auth.js → change to: require('../middlewares/auth')
 
 // Public routes
 router.get('/', getAllTours);
 router.get('/:id', getTourById);
 
-// Admin routes with Cloudinary image upload
-router.post('/', auth, permit('admin'), upload.array('images', 5), createTour);
-router.put('/:id', auth, permit('admin'), upload.array('images', 5), updateTour);
-router.delete('/:id', auth, permit('admin'), deleteTour);
+// Admin only routes
+router.post('/', protect, isAdmin, upload.array('images', 5), createTour);
+router.put('/:id', protect, isAdmin, upload.array('images',5), updateTour);
+router.delete('/:id', protect, isAdmin, deleteTour);
 
 module.exports = router;

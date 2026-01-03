@@ -1,5 +1,13 @@
+// middlewares/errorHandler.js
 module.exports = (err, req, res, next) => {
-  console.error(err);
-  const status = err.statusCode || 500;
-  res.status(status).json({ message: err.message || 'Internal Server Error' });
+  console.error('ERROR:', err);
+
+  const statusCode = err.statusCode || 500;
+
+  res.status(statusCode).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+    // Remove stack trace in production
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+  });
 };

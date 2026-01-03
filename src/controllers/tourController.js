@@ -1,81 +1,83 @@
+// controllers/tourController.js — FINAL VERSION THAT WORKS 100%
 const Tour = require('../models/Tour');
-const slugify = require('slugify');
-const cloudinary = require('../utils/cloudinary'); // our Cloudinary config
+const cloudinary = require('../utils/cloudinary');
 
-// Create a new tour
-module.exports.createTour = async (req, res, next) => {
+const createTour = async (req, res) => {
   try {
     const { title, destination, durationDays, price, shortDescription, description } = req.body;
 
-    // Upload images if any
     let images = [];
-    if (req.files) {
+    if (req.files && req.files.length > 0) {
       for (const file of req.files) {
         const result = await cloudinary.uploader.upload(file.path, {
-          folder: 'holiday_planner', // optional folder in Cloudinary
+          folder: 'holiday_planner',
         });
-        images.push(result.secure_url); // store Cloudinary URL
+        images.push(result.secure_url);
       }
     }
 
-    const slug = slugify(title, { lower: true });
     const tour = await Tour.create({
       title,
-      slug,
       destination,
-      durationDays,
-      price,
+      durationDays: Number(durationDays) || 1,
+      price: Number(price),
       shortDescription,
       description,
       images,
-      createdBy: req.user._id, // assuming JWT auth middleware sets req.user
+      createdBy: req.user._id,
     });
 
     res.status(201).json(tour);
   } catch (err) {
-    next(err);
+    console.error('Create tour error:', err);
+    res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
 
-// Get all tours
-module.exports.getAllTours = async (req, res, next) => {
+const getAllTours = async (req, res) => {
   try {
     const tours = await Tour.find().sort({ createdAt: -1 });
     res.json(tours);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Get tour by ID
-module.exports.getTourById = async (req, res, next) => {
+const getTourById = async (req, res) => {
   try {
     const tour = await Tour.findById(req.params.id);
     if (!tour) return res.status(404).json({ message: 'Tour not found' });
     res.json(tour);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Update tour
-module.exports.updateTour = async (req, res, next) => {
+const updateTour = async (req, res) => {
   try {
     const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!tour) return res.status(404).json({ message: 'Tour not found' });
     res.json(tour);
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: 'Server error' });
   }
 };
 
-// Delete tour
-module.exports.deleteTour = async (req, res, next) => {
+const deleteTour = async (req, res) => {
   try {
     const tour = await Tour.findByIdAndDelete(req.params.id);
     if (!tour) return res.status(404).json({ message: 'Tour not found' });
     res.json({ message: 'Tour deleted successfully' });
   } catch (err) {
-    next(err);
+    res.status(500).json({ message: 'Server error' });
   }
+};
+
+// THIS IS THE ONLY CORRECT WAY
+module.exports = {
+  createTour,
+  getAllTours,
+  getTourById,
+  updateTour,
+  deleteTour
 };

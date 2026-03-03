@@ -85,7 +85,25 @@ app.get('/api', (req, res) => {
     version: '1.0.0',
   });
 });
+// ============ HEALTH CHECK (IMPROVED FOR RENDER) ============
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is awake and healthy! 🚀',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
+// Additional endpoint for UptimeRobot (both work)
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    message: 'Server is awake! ⚡',
+    timestamp: new Date().toISOString()
+  });
+});
 // ============ ERROR HANDLING ============
 app.use((err, req, res, next) => {
   console.error('ERROR:', err.stack || err);

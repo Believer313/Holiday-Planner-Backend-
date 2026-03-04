@@ -26,9 +26,11 @@ app.use(
 );
 
 // ============ CORS (FIXED FOR LOCAL + PRODUCTION) ============
+// ============ CORS (FIXED FOR LOCAL + PRODUCTION) ============
 const allowedOrigins = [
   'http://localhost:5173',
   'https://www.holidayplannertourtravel.org',
+  'https://admin.holidayplannertourtravel.org'
 ];
 
 app.use(
@@ -46,6 +48,7 @@ app.use(
     credentials: true,
   })
 );
+
 
 // ============ BODY PARSERS ============
 app.use(express.json({ limit: '10mb' }));

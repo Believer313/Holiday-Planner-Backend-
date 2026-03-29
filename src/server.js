@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const compression = require('compression');
 
 const connectDB = require('./config/db');
 
@@ -15,18 +16,24 @@ const bookingRoutes = require('./routes/bookingRoutes');
 
 const app = express();
 
+
 // ============ DATABASE ============
 connectDB();
 
-// ============ SECURITY & MIDDLEWARES ============
+
+// ============ SECURITY ============
 app.use(
   helmet({
-    contentSecurityPolicy: false, // Allow Cloudinary images
+    contentSecurityPolicy: false,
   })
 );
 
-// ============ CORS (FIXED FOR LOCAL + PRODUCTION) ============
-// ============ CORS (FIXED FOR LOCAL + PRODUCTION) ============
+
+// ============ RESPONSE COMPRESSION ============
+app.use(compression());
+
+
+// ============ CORS ============
 const allowedOrigins = [
   'http://localhost:5173',
   'https://www.holidayplannertourtravel.org',
@@ -36,7 +43,8 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow Postman, curl, server-to-server
+
+      // allow server requests / postman
       if (!origin) return callback(null, true);
 
       if (allowedOrigins.includes(origin)) {
@@ -44,6 +52,7 @@ app.use(
       } else {
         return callback(new Error(`CORS blocked: ${origin}`));
       }
+
     },
     credentials: true,
   })
@@ -54,61 +63,51 @@ app.use(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+
 // ============ LOGGING ============
 app.use(morgan('dev'));
 
-// ============ RATE LIMITING ============
+
+// ============ RATE LIMIT ============
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 15 * 60 * 1000,
     max: 300,
     message: { message: 'Too many requests, please try again later.' },
   })
 );
+
 
 // ============ ROUTES ============
 app.use('/api/auth', authRoutes);
 app.use('/api/tours', tourRoutes);
 app.use('/api/bookings', bookingRoutes);
 
-// ============ HEALTH CHECK ============
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'Server is healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
-});
 
-// ============ API ROOT ============
+// ============ ROOT ============
 app.get('/api', (req, res) => {
   res.json({
     message: 'Holiday Planner API is LIVE!',
     version: '1.0.0',
   });
 });
-// ============ HEALTH CHECK (IMPROVED FOR RENDER) ============
-app.get('/health', (req, res) => {
+
+
+// ============ HEALTH CHECK (FOR RENDER / UPTIMEROBOT) ============
+app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
-    message: 'Server is awake and healthy! 🚀',
+    message: 'Server is awake! ⚡',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
     environment: process.env.NODE_ENV || 'development'
   });
 });
 
-// Additional endpoint for UptimeRobot (both work)
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'ok',
-    message: 'Server is awake! ⚡',
-    timestamp: new Date().toISOString()
-  });
-});
+
 // ============ ERROR HANDLING ============
 app.use((err, req, res, next) => {
+
   console.error('ERROR:', err.stack || err);
 
   if (err.name === 'ValidationError') {
@@ -129,27 +128,32 @@ app.use((err, req, res, next) => {
     message: err.message || 'Something went wrong!',
     ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
   });
+
 });
+
 
 // ============ 404 ============
 app.use((req, res) => {
   res.status(404).json({
     message: `Route ${req.originalUrl} not found`,
-    tip: 'Check API documentation',
   });
 });
 
-// ============ START SERVER ============
+
+// ============ SERVER START ============
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
+
   console.log('===================================');
   console.log(' HOLIDAY PLANNER API IS LIVE!');
   console.log('===================================');
   console.log(`Server running on port ${PORT}`);
   console.log(`Local: http://localhost:${PORT}`);
   console.log('===================================');
+
 });
+
 
 // ============ GRACEFUL SHUTDOWN ============
 process.on('SIGTERM', () => {

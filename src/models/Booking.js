@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const bookingSchema = new mongoose.Schema({
-  // Keep existing for logged-in users
+  // For logged-in users
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
   tour: { type: mongoose.Schema.Types.ObjectId, ref: 'Tour', required: false },
 
-  // NEW: Fields for public (non-logged-in) bookings
+  // For public (non-logged-in) bookings
   name: { type: String },
   email: { type: String },
   phone: { type: String },
@@ -15,8 +15,15 @@ const bookingSchema = new mongoose.Schema({
 
   // Common fields
   travelDate: { type: Date, required: true },
-  totalPersons: { type: Number },  // for logged-in bookings
+  totalPersons: { type: Number },
   amount: { type: Number, default: 0 },
+  
+  // Status fields
+  status: { 
+    type: String, 
+    enum: ['pending', 'confirmed', 'cancelled'], 
+    default: 'pending' 
+  },
   paymentStatus: {
     type: String,
     enum: ['pending', 'paid', 'failed'],

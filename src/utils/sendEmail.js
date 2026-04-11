@@ -1,19 +1,23 @@
-// utils/sendEmail.js
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
-  // Use your Gmail or any SMTP (Gmail example below)
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,     // → your email
-      pass: process.env.EMAIL_PASS      // → App Password (NOT normal password)
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
     }
   });
 
+  // Handle multiple recipients
+  let recipients = options.to;
+  if (Array.isArray(options.to)) {
+    recipients = options.to.join(', ');
+  }
+
   const mailOptions = {
     from: `"Holiday Planner Tour & Travels" <${process.env.EMAIL_USER}>`,
-    to: options.to,
+    to: recipients,
     subject: options.subject,
     html: options.html
   };

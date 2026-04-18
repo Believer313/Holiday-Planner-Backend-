@@ -1,7 +1,7 @@
 const Booking = require('../models/Booking');
 const Tour = require('../models/Tour');
 const sendEmail = require('../utils/sendEmail');
-const { getAllAdminEmails } = require('../utils/getAdmins');
+const { getAllAdminEmails } = require('../utils/getAdmin');
 const { 
   sendBookingReceivedSMS,
   sendBookingConfirmedSMS,

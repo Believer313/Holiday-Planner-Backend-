@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middlewares/auth');
+// const { protect } = require('../middlewares/auth');   // ← Commented out
+
 const { createOrder } = require('../controllers/paymentController');
 
-// Protected route for creating a payment order
-router.post('/create-order', auth, createOrder);
+// Public route - No protection needed for customers
+router.post('/create-order', createOrder);
 
 module.exports = router;

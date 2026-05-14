@@ -13,7 +13,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const tourRoutes = require('./routes/tourRoutes');
 const bookingRoutes = require('./routes/bookingRoutes');
-
+const paymentRoutes = require('./routes/paymentRoutes');
 const app = express();
 
 
@@ -82,6 +82,7 @@ app.use(
 app.use('/api/auth', authRoutes);
 app.use('/api/tours', tourRoutes);
 app.use('/api/bookings', bookingRoutes);
+app.use('/api/payment',paymentRoutes);
 
 
 // ============ ROOT ============
